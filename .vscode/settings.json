@@ -10,5 +10,11 @@
   },
   "files.associations": {
     "*.css": "tailwindcss"
+  },
+  "files.exclude": {
+    "**/.git": false
+  },
+  "editor.codeActionsOnSave": {
+    
   }
 }
