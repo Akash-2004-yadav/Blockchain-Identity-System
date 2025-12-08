@@ -14,16 +14,38 @@ interface VerificationResult {
 
 export default function VerifyPage() {
   const [sap, setSap] = useState("");
+  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VerificationResult | null>(null);
 
   const handleVerify = async () => {
-    const res = await fetch("http://localhost:5000/verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sap }),
-    });
-    const data = await res.json();
-    setResult(data);
+    if (!sap.trim()) {
+      setResult({ success: false, message: "Please enter SAP ID" });
+      return;
+    }
+
+    setLoading(true);
+    setResult(null);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/verify`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sap }),
+        }
+      );
+
+      const data = await response.json();
+      setResult(data);
+    } catch {
+      setResult({
+        success: false,
+        message: "Cannot connect to backend. Please try again later.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -40,11 +62,13 @@ export default function VerifyPage() {
           onChange={(e) => setSap(e.target.value)}
           className="p-4 w-96 rounded text-black"
         />
+
         <button
           onClick={handleVerify}
           className="bg-blue-600 hover:bg-blue-700 px-6 rounded text-white font-semibold"
+          disabled={loading}
         >
-          Verify
+          {loading ? "Verifying..." : "Verify"}
         </button>
       </div>
 
@@ -62,18 +86,10 @@ export default function VerifyPage() {
 
           {result.success ? (
             <>
-              <p>
-                <b>Name:</b> {result.data.name}
-              </p>
-              <p>
-                <b>Email:</b> {result.data.email}
-              </p>
-              <p>
-                <b>SAP:</b> {result.data.sap}
-              </p>
-              <p>
-                <b>Issued On:</b> {result.data.issueDate}
-              </p>
+              <p><b>Name:</b> {result.data.name}</p>
+              <p><b>Email:</b> {result.data.email}</p>
+              <p><b>SAP:</b> {result.data.sap}</p>
+              <p><b>Issued On:</b> {result.data.issueDate}</p>
             </>
           ) : (
             <p>{result.message}</p>
