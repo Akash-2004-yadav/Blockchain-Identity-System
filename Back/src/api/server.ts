@@ -11,10 +11,11 @@ app.use(express.json());
 app.use(
   cors({
     origin: [
-      "https://blockchain-identity-system.vercel.app",
-      "http://localhost:3000", // optional for local development
+      "http://localhost:3000",                                   // for local development
+      "https://blockchain-identity-system.vercel.app",          // your Vercel production URL
     ],
     methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
   })
 );
 
@@ -30,9 +31,7 @@ app.use("/verify", verifyRouter);
 app.use("/users", usersRouter);
 
 /* Health check route for Render */
-app.get("/health", (_, res) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
-});
+app.get("/health", (_, res) => res.json({ status: "ok" }));
 
 app.get("/", (_, res) => res.send("Backend running 🚀"));
 
